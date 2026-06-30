@@ -400,6 +400,74 @@ svg { width: 100%; height: auto; }
   margin-top: 8px;
 }
 .back-link:hover { color: var(--green); }
+
+/* ──────────────── Narratives / Tabs ──────────────── */
+
+.hero-tagline {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 560px;
+  margin: -16px auto 24px;
+  line-height: 1.5;
+}
+
+.landing-narrative {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto 20px;
+}
+
+.tab-nav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.tab-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 99px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover:not(.active) { border-color: var(--green); color: var(--green-d); }
+.tab-btn.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.narrative-card {
+  background: #f0f9f4;
+  border: 1.5px solid #c3e6d4;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 0 auto 20px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #1a3a2a;
+  line-height: 1.6;
+}
+
+.merge-cta-wrap {
+  text-align: center;
+  margin: 4px auto 24px;
+}
+
+.team-flower-card {
+  max-width: 420px;
+  margin: 0 auto 20px;
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -409,10 +477,12 @@ svg { width: 100%; height: auto; }
   <div class="anniversary-pill">3rd Anniversary ✦</div>
 </header>
 
-<!-- PHASE A -->
-<div id="phaseA">
+<!-- LANDING -->
+<div id="landingScreen">
+  <div class="hero-tagline">Gather honest scores. Compare. Discuss. All in minutes — not hours, months, or years.</div>
+
   <div class="card teaser-wrap">
-    <div class="teaser-label">Their flower (revealed after you score)</div>
+    <div class="teaser-label">Their flower (hidden until you score your own)</div>
     <div class="teaser-svg-container">
       <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="teaserSvg">
         <g transform="translate(5 5)">
@@ -434,6 +504,17 @@ svg { width: 100%; height: auto; }
 
     <hr class="divider">
 
+    <div class="landing-narrative">
+      Someone on your team shared their PETALS flower with you. That's the whole point of this exercise: honest scores first, comparison second. Start your own check-in below — their results stay hidden until yours are in.
+    </div>
+
+    <button class="reveal-btn" id="startOwnBtn" onclick="startOwn()">Start my own check-in ✦</button>
+  </div>
+</div>
+
+<!-- PHASE A -->
+<div id="phaseA" style="display:none">
+  <div class="card">
     <div class="section-label">Your turn</div>
     <div class="section-title">How was your week?</div>
     <div id="recipientFactors"></div>
@@ -444,77 +525,128 @@ svg { width: 100%; height: auto; }
 </div>
 
 <!-- PHASE B -->
-<div id="phaseB">
+<div id="phaseB" style="display:none">
   <div class="comparison-headline" id="comparisonHeadline"></div>
 
-  <div class="flowers-grid">
-    <div class="flower-col" id="origCol">
-      <div class="col-label">Their week</div>
-      <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="origSvg">
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabBtnIndividuals" onclick="switchTab('individuals')">Individuals</button>
+    <button class="tab-btn" id="tabBtnTeam" onclick="switchTab('team')">Team</button>
+  </div>
+
+  <!-- Individuals tab -->
+  <div class="tab-panel active" id="individualsTab">
+    <div class="narrative-card">
+      Two honest weeks, side by side. The differences here aren't a problem to fix — they're exactly what's worth talking about.
+    </div>
+
+    <div class="flowers-grid">
+      <div class="flower-col" id="origCol">
+        <div class="col-label">Their week</div>
+        <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="origSvg">
+          <g transform="translate(5 5)">
+            <text class="petal-label" x="218" y="4">Productivity</text>
+            <text class="petal-label" x="380" y="155">Enjoyment</text>
+            <text class="petal-label" x="335" y="368">Teamwork</text>
+            <text class="petal-label" x="111" y="368">Learning</text>
+            <text class="petal-label" x="46" y="155">Serenity</text>
+            <circle id="ocp" class="petal-circle" cx="218" cy="90" r="88"/>
+            <circle id="oce" class="petal-circle" cx="346" cy="202" r="88"/>
+            <circle id="oct" class="petal-circle" cx="298" cy="331" r="88"/>
+            <circle id="ocl" class="petal-circle" cx="154" cy="331" r="88"/>
+            <circle id="ocs" class="petal-circle" cx="90" cy="202" r="88"/>
+            <circle id="oca" class="petal-circle" cx="218" cy="218" r="88"/>
+            <text class="watermark" x="218" y="200">#PETALS</text>
+            <text id="osp" class="petal-score" x="218" y="90"></text>
+            <text id="ose" class="petal-score" x="346" y="202"></text>
+            <text id="ost" class="petal-score" x="298" y="331"></text>
+            <text id="osl" class="petal-score" x="154" y="331"></text>
+            <text id="oss" class="petal-score" x="90" y="202"></text>
+            <text id="osa" class="petal-score" x="218" y="218"></text>
+          </g>
+        </svg>
+        <div class="col-avg" id="origAvg"></div>
+        <div class="col-avg-label">Weekly average</div>
+      </div>
+
+      <div class="flower-col" id="recipCol">
+        <div class="col-label">Your week</div>
+        <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="recipSvg">
+          <g transform="translate(5 5)">
+            <text class="petal-label" x="218" y="4">Productivity</text>
+            <text class="petal-label" x="380" y="155">Enjoyment</text>
+            <text class="petal-label" x="335" y="368">Teamwork</text>
+            <text class="petal-label" x="111" y="368">Learning</text>
+            <text class="petal-label" x="46" y="155">Serenity</text>
+            <circle id="rcp" class="petal-circle" cx="218" cy="90" r="88"/>
+            <circle id="rce" class="petal-circle" cx="346" cy="202" r="88"/>
+            <circle id="rct" class="petal-circle" cx="298" cy="331" r="88"/>
+            <circle id="rcl" class="petal-circle" cx="154" cy="331" r="88"/>
+            <circle id="rcs" class="petal-circle" cx="90" cy="202" r="88"/>
+            <circle id="rca" class="petal-circle" cx="218" cy="218" r="88"/>
+            <text class="watermark" x="218" y="200">#PETALS</text>
+            <text id="rsp" class="petal-score" x="218" y="90"></text>
+            <text id="rse" class="petal-score" x="346" y="202"></text>
+            <text id="rst" class="petal-score" x="298" y="331"></text>
+            <text id="rsl" class="petal-score" x="154" y="331"></text>
+            <text id="rss" class="petal-score" x="90" y="202"></text>
+            <text id="rsa" class="petal-score" x="218" y="218"></text>
+          </g>
+        </svg>
+        <div class="col-avg" id="recipAvg"></div>
+        <div class="col-avg-label">Weekly average</div>
+      </div>
+    </div>
+
+    <div class="analysis-card" id="analysisCard">
+      <div class="analysis-heading">What stands out</div>
+      <div id="analysisContent"></div>
+    </div>
+
+    <div class="merge-cta-wrap">
+      <button class="cta-btn" style="border:none;cursor:pointer;font-family:'Lilita One',cursive;" onclick="switchTab('team')">Merge into your Team Flower ✦</button>
+    </div>
+  </div>
+
+  <!-- Team tab -->
+  <div class="tab-panel" id="teamTab">
+    <div class="narrative-card">
+      This is what PETALS is really for: combining individual honesty into one team signal. You gather honest scores, compare them, and discuss what's different — all in minutes, not hours, months, or years.
+    </div>
+
+    <div class="card team-flower-card">
+      <div class="col-label">Your team's week</div>
+      <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="teamSvg">
         <g transform="translate(5 5)">
           <text class="petal-label" x="218" y="4">Productivity</text>
           <text class="petal-label" x="380" y="155">Enjoyment</text>
           <text class="petal-label" x="335" y="368">Teamwork</text>
           <text class="petal-label" x="111" y="368">Learning</text>
           <text class="petal-label" x="46" y="155">Serenity</text>
-          <circle id="ocp" class="petal-circle" cx="218" cy="90" r="88"/>
-          <circle id="oce" class="petal-circle" cx="346" cy="202" r="88"/>
-          <circle id="oct" class="petal-circle" cx="298" cy="331" r="88"/>
-          <circle id="ocl" class="petal-circle" cx="154" cy="331" r="88"/>
-          <circle id="ocs" class="petal-circle" cx="90" cy="202" r="88"/>
-          <circle id="oca" class="petal-circle" cx="218" cy="218" r="88"/>
+          <circle id="tmcp" class="petal-circle" cx="218" cy="90" r="88"/>
+          <circle id="tmce" class="petal-circle" cx="346" cy="202" r="88"/>
+          <circle id="tmct" class="petal-circle" cx="298" cy="331" r="88"/>
+          <circle id="tmcl" class="petal-circle" cx="154" cy="331" r="88"/>
+          <circle id="tmcs" class="petal-circle" cx="90" cy="202" r="88"/>
+          <circle id="tmca" class="petal-circle" cx="218" cy="218" r="88"/>
           <text class="watermark" x="218" y="200">#PETALS</text>
-          <text id="osp" class="petal-score" x="218" y="90"></text>
-          <text id="ose" class="petal-score" x="346" y="202"></text>
-          <text id="ost" class="petal-score" x="298" y="331"></text>
-          <text id="osl" class="petal-score" x="154" y="331"></text>
-          <text id="oss" class="petal-score" x="90" y="202"></text>
-          <text id="osa" class="petal-score" x="218" y="218"></text>
+          <text id="tmsp" class="petal-score" x="218" y="90"></text>
+          <text id="tmse" class="petal-score" x="346" y="202"></text>
+          <text id="tmst" class="petal-score" x="298" y="331"></text>
+          <text id="tmsl" class="petal-score" x="154" y="331"></text>
+          <text id="tmss" class="petal-score" x="90" y="202"></text>
+          <text id="tmsa" class="petal-score" x="218" y="218"></text>
         </g>
       </svg>
-      <div class="col-avg" id="origAvg"></div>
-      <div class="col-avg-label">Weekly average</div>
+      <div class="col-avg" id="teamAvg"></div>
+      <div class="col-avg-label">Team average</div>
     </div>
 
-    <div class="flower-col" id="recipCol">
-      <div class="col-label">Your week</div>
-      <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="recipSvg">
-        <g transform="translate(5 5)">
-          <text class="petal-label" x="218" y="4">Productivity</text>
-          <text class="petal-label" x="380" y="155">Enjoyment</text>
-          <text class="petal-label" x="335" y="368">Teamwork</text>
-          <text class="petal-label" x="111" y="368">Learning</text>
-          <text class="petal-label" x="46" y="155">Serenity</text>
-          <circle id="rcp" class="petal-circle" cx="218" cy="90" r="88"/>
-          <circle id="rce" class="petal-circle" cx="346" cy="202" r="88"/>
-          <circle id="rct" class="petal-circle" cx="298" cy="331" r="88"/>
-          <circle id="rcl" class="petal-circle" cx="154" cy="331" r="88"/>
-          <circle id="rcs" class="petal-circle" cx="90" cy="202" r="88"/>
-          <circle id="rca" class="petal-circle" cx="218" cy="218" r="88"/>
-          <text class="watermark" x="218" y="200">#PETALS</text>
-          <text id="rsp" class="petal-score" x="218" y="90"></text>
-          <text id="rse" class="petal-score" x="346" y="202"></text>
-          <text id="rst" class="petal-score" x="298" y="331"></text>
-          <text id="rsl" class="petal-score" x="154" y="331"></text>
-          <text id="rss" class="petal-score" x="90" y="202"></text>
-          <text id="rsa" class="petal-score" x="218" y="218"></text>
-        </g>
-      </svg>
-      <div class="col-avg" id="recipAvg"></div>
-      <div class="col-avg-label">Weekly average</div>
+    <div class="cta-card" id="ctaCard">
+      <div class="card-heading">Do this every week with your whole team</div>
+      <p class="cta-copy">One honest check-in can open conversations that months of meetings miss. PETALS makes reflection a weekly habit your whole team can share.</p>
+      <a class="cta-btn" href="https://usepetals.com/account/join?promo=anniversary3" target="_blank" rel="noopener">Start with your team ✦</a>
+      <a class="back-link" href="index.html">← Score another week</a>
     </div>
-  </div>
-
-  <div class="analysis-card" id="analysisCard">
-    <div class="analysis-heading">What stands out</div>
-    <div id="analysisContent"></div>
-  </div>
-
-  <div class="cta-card" id="ctaCard">
-    <div class="card-heading">Do this every week with your whole team</div>
-    <p class="cta-copy">One honest check-in can open conversations that months of meetings miss. PETALS makes reflection a weekly habit your whole team can share.</p>
-    <a class="cta-btn" href="https://usepetals.com/account/join?promo=anniversary3" target="_blank" rel="noopener">Start with your team ✦</a>
-    <a class="back-link" href="index.html">← Score another week</a>
   </div>
 </div>
 
@@ -635,6 +767,19 @@ function updateProgress() {
   }
 }
 
+function startOwn() {
+  document.getElementById('landingScreen').style.display = 'none';
+  document.getElementById('phaseA').style.display = 'block';
+}
+
+function switchTab(name) {
+  document.getElementById('individualsTab').classList.toggle('active', name === 'individuals');
+  document.getElementById('teamTab').classList.toggle('active', name === 'team');
+  document.getElementById('tabBtnIndividuals').classList.toggle('active', name === 'individuals');
+  document.getElementById('tabBtnTeam').classList.toggle('active', name === 'team');
+  document.getElementById('phaseB').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function doReveal() {
   if (FACTOR_KEYS.some(k => recipScores[k] === 0)) return;
 
@@ -668,8 +813,33 @@ function doReveal() {
   setTimeout(() => {
     renderAnalysis();
     document.getElementById('analysisCard').classList.add('show');
-    document.getElementById('ctaCard').classList.add('show');
   }, 500);
+
+  // Team flower — the merged result both individual scores combine into
+  renderTeamFlower(origScores, recipScores);
+}
+
+function renderTeamFlower(orig, recip) {
+  const merged = {};
+  FACTOR_KEYS.forEach(k => merged[k] = (orig[k] + recip[k]) / 2);
+  const avg = FACTOR_KEYS.reduce((s, k) => s + merged[k], 0) / 5;
+
+  const order = ['p', 'e', 't', 'l', 's', 'a'];
+  order.forEach((key, i) => {
+    setTimeout(() => {
+      const val = key === 'a' ? avg : merged[key];
+      const colorKey = Math.round(val);
+      document.getElementById(`tmc${key}`).style.fill = COLORS[colorKey];
+      document.getElementById(`tmc${key}`).style.stroke = STROKES[colorKey];
+      const scoreEl = document.getElementById(`tms${key}`);
+      scoreEl.textContent = val.toFixed(1);
+      scoreEl.classList.add('show');
+    }, i * 280);
+  });
+
+  document.getElementById('teamAvg').textContent = avg.toFixed(1);
+
+  setTimeout(() => document.getElementById('ctaCard').classList.add('show'), 1700);
 }
 
 function animateFlower(prefix, sc, avg) {
