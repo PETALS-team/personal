@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PETALS — Your Flower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #14AE5C;
+  --green-d: #108B4A;
+  --c1: #F24822; --s1: #C23A1B;
+  --c2: #FFA629; --s2: #CC8521;
+  --c3: #FFCD29; --s3: #CCA421;
+  --c4: #BBCC00; --s4: #9aaa00;
+  --c5: #14AE5C; --s5: #108B4A;
+  --bg: #edf2f7;
+  --card: #fff;
+  --muted: #6b7280;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+h1, h2, h3, .logo { font-family: 'Lilita One', cursive; }
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  margin: 0 auto 32px;
+}
+
+.logo {
+  font-size: 28px;
+  color: var(--green);
+  letter-spacing: 2px;
+}
+
+.anniversary-pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #14AE5C, #108B4A, #0d7a3e);
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  max-width: 600px;
+  margin: 0 auto 20px;
+  padding: 32px 24px;
+}
+
+.flower-card {
+  text-align: center;
+}
+
+.flower-title {
+  font-family: 'Lilita One', cursive;
+  font-size: 26px;
+  color: #111827;
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.flower-title.show { opacity: 1; transform: translateY(0); }
+
+.flower-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  opacity: 0;
+  transition: opacity 0.4s 0.1s;
+}
+.flower-subtitle.show { opacity: 1; }
+
+.svg-wrap {
+  opacity: 0;
+  transition: opacity 0.5s;
+  max-width: 456px;
+  margin: 0 auto;
+}
+.svg-wrap.show { opacity: 1; }
+
+svg { width: 100%; height: auto; }
+
+.petal-circle {
+  fill: #ddd;
+  stroke: #ccc;
+  stroke-width: 8;
+  transition: fill 0.4s ease, stroke 0.4s ease;
+}
+
+.petal-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  fill: #374151;
+  text-anchor: middle;
+}
+
+.petal-score {
+  font-family: 'Lilita One', cursive;
+  font-size: 28px;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: central;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.petal-score.show { opacity: 1; }
+
+.watermark {
+  font-family: 'Lilita One', cursive;
+  font-size: 11px;
+  fill: rgba(255,255,255,0.5);
+  text-anchor: middle;
+  letter-spacing: 2px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.chips.show { opacity: 1; transform: translateY(0); }
+
+.chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 99px;
+  color: #fff;
+}
+
+.avg-block {
+  margin-top: 24px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.avg-block.show { opacity: 1; }
+
+.avg-num {
+  font-family: 'Lilita One', cursive;
+  font-size: 56px;
+  line-height: 1;
+  color: #111827;
+}
+
+.avg-label {
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 2px;
+}
+
+.message-callout {
+  border-left: 4px solid var(--green);
+  background: #f0f9f4;
+  border-radius: 0 12px 12px 0;
+  padding: 16px 18px;
+  font-size: 15px;
+  color: #1a3a2a;
+  text-align: left;
+  margin-top: 24px;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.message-callout.show { opacity: 1; transform: translateY(0); }
+
+.card-heading {
+  font-family: 'Lilita One', cursive;
+  font-size: 20px;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.compare-url-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.compare-url-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #374151;
+  background: #f9fafb;
+  font-family: 'Inter', sans-serif;
+  min-width: 0;
+}
+
+.copy-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.copy-btn:hover { background: var(--green-d); }
+
+.social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s;
+  text-decoration: none;
+  color: #fff;
+}
+.social-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.btn-twitter { background: #000; }
+.btn-linkedin { background: #0A66C2; }
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.save-btn:hover { background: #e5e7eb; }
+
+.reward-banner {
+  display: none;
+  background: linear-gradient(135deg, #f0f9f4, #dcfce7);
+  border: 1.5px solid #c3e6d4;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #1a3a2a;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+.reward-banner.show { display: block; }
+.reward-banner a { color: var(--green-d); font-weight: 600; }
+
+.cta-copy {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.cta-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 40px;
+  font-family: 'Lilita One', cursive;
+  font-size: 18px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.12s;
+  box-shadow: 0 4px 16px rgba(20,174,92,0.3);
+}
+.cta-btn:hover { background: var(--green-d); transform: translateY(-1px); }
+
+.fade-card {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.fade-card.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌸 PETALS</div>
+  <div class="anniversary-pill">3rd Anniversary ✦</div>
+</header>
+
+<!-- Flower card -->
+<div class="card flower-card">
+  <div class="flower-title" id="flowerTitle">Your week as a flower</div>
+  <div class="flower-subtitle" id="flowerSubtitle">Each petal reflects one dimension of your week</div>
+
+  <div class="svg-wrap" id="svgWrap">
+    <svg viewBox="0 0 456 441" xmlns="http://www.w3.org/2000/svg" id="flowerSvg">
+      <g transform="translate(5 5)">
+        <!-- Labels -->
+        <text class="petal-label" x="218" y="4">Productivity</text>
+        <text class="petal-label" x="380" y="155">Enjoyment</text>
+        <text class="petal-label" x="335" y="368">Teamwork</text>
+        <text class="petal-label" x="111" y="368">Learning</text>
+        <text class="petal-label" x="46" y="155">Serenity</text>
+
+        <!-- Petals -->
+        <circle id="cp" class="petal-circle" cx="218" cy="90" r="88"/>
+        <circle id="ce" class="petal-circle" cx="346" cy="202" r="88"/>
+        <circle id="ct" class="petal-circle" cx="298" cy="331" r="88"/>
+        <circle id="cl" class="petal-circle" cx="154" cy="331" r="88"/>
+        <circle id="cs" class="petal-circle" cx="90" cy="202" r="88"/>
+        <circle id="ca" class="petal-circle" cx="218" cy="218" r="88"/>
+
+        <!-- Watermark -->
+        <text class="watermark" x="218" y="200">#PETALS</text>
+
+        <!-- Score numbers -->
+        <text id="sp" class="petal-score" x="218" y="90">0</text>
+        <text id="se" class="petal-score" x="346" y="202">0</text>
+        <text id="st" class="petal-score" x="298" y="331">0</text>
+        <text id="sl" class="petal-score" x="154" y="331">0</text>
+        <text id="ss" class="petal-score" x="90" y="202">0</text>
+        <text id="sa" class="petal-score" x="218" y="218">0</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="avg-block" id="avgBlock">
+    <div class="avg-num" id="avgNum">—</div>
+    <div class="avg-label">Weekly average</div>
+  </div>
+
+  <div class="message-callout" id="messageCallout"></div>
+</div>
+
+<!-- Share card -->
+<div class="card fade-card" id="shareCard">
+  <div class="card-heading">Share your flower</div>
+
+  <div style="font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;">Compare with a teammate</div>
+  <div class="compare-url-row">
+    <input class="compare-url-input" id="compareUrl" type="text" readonly>
+    <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copy link</button>
+  </div>
+
+  <div style="font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;">Share your flower</div>
+  <div class="social-row">
+    <button class="social-btn btn-twitter" id="twitterBtn" onclick="shareTwitter()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      Post on X
+    </button>
+    <button class="social-btn btn-linkedin" id="linkedinBtn" onclick="shareLinkedIn()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      Share on LinkedIn
+    </button>
+    <button class="save-btn" onclick="saveImage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Save as image
+    </button>
+  </div>
+
+  <div class="reward-banner" id="rewardBanner">
+    🎉 You're one of the brave ones. Get 3 months free on PETALS Plus when you sign up.
+    <a href="https://usepetals.com/account/join?promo=anniversary3" target="_blank" rel="noopener">Claim your reward →</a>
+  </div>
+</div>
+
+<!-- CTA card -->
+<div class="card fade-card" id="ctaCard">
+  <h2 class="card-heading">Make this a weekly ritual</h2>
+  <p class="cta-copy">When your whole team checks in together, patterns emerge — and real conversations start. PETALS helps teams stay honest, week after week.</p>
+  <a class="cta-btn" href="https://usepetals.com/account/join?promo=anniversary3" target="_blank" rel="noopener">Start with your team ✦</a>
+</div>
+
+<script>
+const COLORS = { 1: '#F24822', 2: '#FFA629', 3: '#FFCD29', 4: '#BBCC00', 5: '#14AE5C' };
+const STROKES = { 1: '#C23A1B', 2: '#CC8521', 3: '#CCA421', 4: '#9aaa00', 5: '#108B4A' };
+const FACTOR_NAMES = { p: 'Productivity', e: 'Enjoyment', t: 'Teamwork', l: 'Learning', s: 'Serenity' };
+const MESSAGES = [
+  '', // index 0 unused
+  'Tough week. Sharing how you really feel is the bravest thing you can do.',
+  'A hard week — but naming it honestly is the first step.',
+  'A mixed week — the most honest kind. Worth talking about.',
+  'A solid week. Your team would find your perspective valuable.',
+  'You had a great week. Your team would love to know that.'
+];
+
+let scores;
+let compareUrl;
+let sharedOnce = false;
+
+function decode() {
+  try {
+    const hash = location.hash.slice(1);
+    if (!hash) throw new Error('no hash');
+    scores = JSON.parse(atob(hash));
+    if (!scores.p || !scores.e || !scores.t || !scores.l || !scores.s) throw new Error('invalid');
+  } catch(e) {
+    location.href = 'index.html';
+  }
+}
+
+function animateFlower() {
+  const order = ['p', 'e', 't', 'l', 's', 'a'];
+  const avg = ((scores.p + scores.e + scores.t + scores.l + scores.s) / 5);
+  scores.a = avg;
+  const avgRounded = Math.round(avg * 10) / 10;
+  const avgFloor = Math.floor(avg);
+
+  // Fade in SVG + title
+  document.getElementById('svgWrap').classList.add('show');
+  document.getElementById('flowerTitle').classList.add('show');
+  document.getElementById('flowerSubtitle').classList.add('show');
+
+  let delay = 300;
+  order.forEach((key, i) => {
+    setTimeout(() => {
+      const val = key === 'a' ? Math.round(avg) : scores[key];
+      const colorKey = Math.round(val);
+      const circle = document.getElementById(`c${key}`);
+      const scoreEl = document.getElementById(`s${key}`);
+
+      circle.style.fill = COLORS[colorKey];
+      circle.style.stroke = STROKES[colorKey];
+      scoreEl.textContent = key === 'a' ? avgRounded.toFixed(1) : val;
+      scoreEl.classList.add('show');
+
+      if (key === 'a') {
+        setTimeout(() => showAfterFlower(avg, avgRounded, avgFloor), 200);
+      }
+    }, delay + i * 380);
+  });
+}
+
+function showAfterFlower(avg, avgRounded, avgFloor) {
+  // Score chips
+  const chips = document.getElementById('chips');
+  ['p','e','t','l','s'].forEach(k => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.style.background = COLORS[scores[k]];
+    chip.textContent = `${FACTOR_NAMES[k]} ${scores[k]}/5`;
+    chips.appendChild(chip);
+  });
+  setTimeout(() => chips.classList.add('show'), 50);
+
+  // Average
+  setTimeout(() => {
+    document.getElementById('avgNum').textContent = avgRounded.toFixed(1);
+    document.getElementById('avgBlock').classList.add('show');
+  }, 200);
+
+  // Message
+  setTimeout(() => {
+    const msg = document.getElementById('messageCallout');
+    msg.textContent = MESSAGES[Math.max(1, Math.min(5, avgFloor))];
+    msg.classList.add('show');
+  }, 450);
+
+  // Cards
+  setTimeout(() => {
+    document.getElementById('shareCard').classList.add('show');
+    document.getElementById('ctaCard').classList.add('show');
+  }, 700);
+
+  // Populate compare URL
+  compareUrl = `${location.origin}${location.pathname.replace('result.html','compare.html')}#${btoa(JSON.stringify({p:scores.p,e:scores.e,t:scores.t,l:scores.l,s:scores.s}))}`;
+  document.getElementById('compareUrl').value = compareUrl;
+}
+
+function copyUrl() {
+  navigator.clipboard.writeText(compareUrl).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy link', 2000);
+  }).catch(() => {
+    document.getElementById('compareUrl').select();
+    document.execCommand('copy');
+  });
+}
+
+function tweetText() {
+  const avg = ((scores.p + scores.e + scores.t + scores.l + scores.s) / 5);
+  return `My PETALS score this week:\nProductivity ${scores.p}/5 · Enjoyment ${scores.e}/5 · Teamwork ${scores.t}/5 · Learning ${scores.l}/5 · Serenity ${scores.s}/5\nAverage: ${(avg).toFixed(1)}/5\n\nHow did your week compare? ${compareUrl}\n#PETALS`;
+}
+
+function shareTwitter() {
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText())}`;
+  window.open(url, '_blank', 'width=600,height=400');
+  showReward();
+}
+
+function shareLinkedIn() {
+  const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(compareUrl)}`;
+  window.open(url, '_blank', 'width=600,height=600');
+  showReward();
+}
+
+function showReward() {
+  if (!sharedOnce) {
+    sharedOnce = true;
+    document.getElementById('rewardBanner').classList.add('show');
+  }
+}
+
+function saveImage() {
+  const svg = document.getElementById('flowerSvg');
+  const serializer = new XMLSerializer();
+  let svgStr = serializer.serializeToString(svg);
+
+  // Inline font styles so canvas renders text
+  const style = `<style>text { font-family: Georgia, serif; }</style>`;
+  svgStr = svgStr.replace('<svg', `<svg xmlns="http://www.w3.org/2000/svg"`).replace('>', `>${style}`);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 580;
+  const ctx = canvas.getContext('2d');
+
+  const img = new Image();
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  img.onload = () => {
+    ctx.fillStyle = '#edf2f7';
+    ctx.fillRect(0, 0, 600, 580);
+    ctx.drawImage(img, (600 - 456) / 2, 10, 456, 441);
+
+    // Watermark
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '14px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('usepetals.com', 300, 572);
+
+    URL.revokeObjectURL(blobUrl);
+
+    const link = document.createElement('a');
+    link.download = 'my-petals-flower.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  img.src = blobUrl;
+}
+
+decode();
+animateFlower();
+</script>
+</body>
+</html>
