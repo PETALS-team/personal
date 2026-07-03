@@ -299,8 +299,8 @@ function renderCompareResult(){
     let doneBlock = '';
     if(done){
       const analysis = [];
-      const divStyle = "border:2.5px solid #141414;border-left-width:8px;border-radius:10px;background:#FFF3D6;padding:12px 15px;font-size:14px;font-weight:500;line-height:1.45;color:#3a352a";
-      const accStyle = "border:2.5px solid #141414;border-left-width:8px;border-radius:10px;background:#e6f7ee;padding:12px 15px;font-size:14px;font-weight:500;line-height:1.45;color:#14532d";
+      const divStyle = "border:2.5px solid #141414;border-left:8px solid #FFA629;border-radius:10px;background:rgba(255,166,41,.14);padding:12px 15px;font-size:14px;font-weight:500;line-height:1.45;color:#3a352a";
+      const accStyle = "border:2.5px solid #141414;border-left:8px solid #14AE5C;border-radius:10px;background:rgba(20,174,92,.12);padding:12px 15px;font-size:14px;font-weight:500;line-height:1.45;color:#3a352a";
       FACTORS.forEach(f=>{
         const gap = their[f.key] - mine[f.key];
         if(Math.abs(gap) >= 2) analysis.push({label:f.name+'. ', body: gap>0 ? DIVERGE[f.key].theirs : DIVERGE[f.key].yours, style:divStyle});
