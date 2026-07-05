@@ -72,6 +72,9 @@ const FACTORS = [
   {key:'s', name:'Serenity', emoji:'🧘', prompt:'How calm and settled did you feel?', low:'Frazzled', high:'At ease', hints:["Felt overwhelmed and under constant pressure","Under pressure more than felt comfortable","Manageable, but not really relaxed","Mostly calm and focused","Felt settled and in the zone"]}
 ];
 const COLORS = {1:'#F24822',2:'#FFA629',3:'#FFCD29',4:'#BBCC00',5:'#14AE5C'};
+// Maps a score (possibly fractional, e.g. an average) to its colour bucket:
+// (0-1] red, (1-2] orange, (2-3] yellow, (3-4] light green, (4-5] dark green.
+function scoreBucket(v){ return Math.max(1, Math.min(5, Math.ceil(v))); }
 // Core brand colours, pulled from the five petal fills in the PETALS logo mark.
 const BRAND = {purple:'#D8B4FE', lime:'#C1FF72', yellow:'#FFDE59', pink:'#FF66C4', teal:'#68CFB7'};
 const MESSAGES = {1:"Tough week. Sharing how you really feel is the bravest thing you can do.",2:"A hard week, but naming it honestly is the first step.",3:"A mixed week, the most honest kind. Worth talking about.",4:"A solid week. Your team would find your perspective valuable.",5:"A great week. Your team would love to know that."};
@@ -119,7 +122,7 @@ function buildFlower(opts){
   defs.forEach((d,i)=>{
     const v = scores[d.k] || 0;
     const on = i < revealed && v > 0;
-    const rv = Math.round(v);
+    const rv = scoreBucket(v);
     const fill = on ? COLORS[rv] : EMPTY_PETAL;
     petalsHtml += `<circle cx="${d.cx}" cy="${d.cy}" r="${R}" fill="${fill}" stroke="#141414" stroke-width="7.5" style="transition:fill .35s ease"></circle>`;
     if(on && showScores){
@@ -141,7 +144,7 @@ function buildFlower(opts){
   });
   const avgRaw = mean(scores);
   const centerOn = revealed >= 6 && avgRaw > 0;
-  const ca = Math.round(avgRaw);
+  const ca = scoreBucket(avgRaw);
   const centerFill = centerOn ? COLORS[ca] : EMPTY_PETAL;
   const centerNum = (centerOn && showScores)
     ? `<text x="218" y="218" text-anchor="middle" dominant-baseline="central" fill="${textOn(ca)}" style="font-family:'Lilita One',cursive;font-size:34px">${avgRaw.toFixed(1)}</text>`
@@ -234,7 +237,7 @@ function renderReveal(){
   const s = state.scores;
   const avgRaw = mean(s);
   const done = state.revealCount >= 6;
-  const floorA = Math.max(1, Math.min(5, Math.floor(avgRaw) || 1));
+  const bucketA = scoreBucket(avgRaw);
   const flowerHtml = buildFlower({scores:s, revealed:state.revealCount, showScores:true});
 
   let doneBlock = '';
@@ -248,10 +251,10 @@ function renderReveal(){
       <div style="display:flex;align-items:center;gap:14px;margin-top:20px;background:#141414;border:3px solid #141414;border-radius:14px;padding:14px 18px;box-shadow:6px 6px 0 #14AE5C">
         <div style="font-family:'Lilita One',cursive;font-size:46px;line-height:.9;color:#fff">${avgRaw.toFixed(1)}</div>
         <div style="font-family:'Lilita One',cursive;font-size:11px;letter-spacing:1px;line-height:1.35;color:#cbb">WEEKLY<br>AVERAGE</div>
-        <div style="margin-left:auto;font-family:'Lilita One',cursive;font-size:14px;background:${COLORS[floorA]};color:${(floorA===1||floorA===5)?'#fff':'#141414'};border:2.5px solid #fff;border-radius:6px;padding:7px 11px;transform:rotate(-3deg)">${STICKERS[floorA]}</div>
+        <div style="margin-left:auto;font-family:'Lilita One',cursive;font-size:14px;background:${COLORS[bucketA]};color:${(bucketA===1||bucketA===5)?'#fff':'#141414'};border:2.5px solid #fff;border-radius:6px;padding:7px 11px;transform:rotate(-3deg)">${STICKERS[bucketA]}</div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">${chips}</div>
-      <div style="background:#fff;border:3px solid #141414;border-radius:12px;padding:15px 17px;margin-top:16px;box-shadow:4px 4px 0 #141414;font-size:15.5px;font-weight:500;line-height:1.5;color:#3a352a">${MESSAGES[floorA]}</div>
+      <div style="background:#fff;border:3px solid #141414;border-radius:12px;padding:15px 17px;margin-top:16px;box-shadow:4px 4px 0 #141414;font-size:15.5px;font-weight:500;line-height:1.5;color:#3a352a">${MESSAGES[bucketA]}</div>
 
       <div style="margin-top:22px;background:#FFCD29;border:3px solid #141414;border-radius:16px;padding:18px;box-shadow:6px 6px 0 #141414">
         <div style="font-family:'Lilita One',cursive;font-size:20px;margin-bottom:4px">Share your flower</div>
@@ -357,7 +360,7 @@ function compareBodyHtml(tab){
   const teamAvg = mean(merged);
   const teamFlower = buildFlower({scores:merged, revealed:6, showScores:true});
   const teamChips = FACTORS.map(f=>{
-    const v = merged[f.key]; const rv = Math.round(v); const col = COLORS[rv]||'#ccc'; const tc = (rv===1||rv===5)?'#fff':'#141414';
+    const v = merged[f.key]; const rv = scoreBucket(v); const col = COLORS[rv]||'#ccc'; const tc = (rv===1||rv===5)?'#fff':'#141414';
     const disp = Number.isInteger(v) ? v : v.toFixed(1);
     return `<span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border-radius:20px;border:2.5px solid #141414;background:${col};color:${tc}">${f.name} ${disp}</span>`;
   }).join('');
