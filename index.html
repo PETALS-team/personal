@@ -37,6 +37,10 @@ button { font-family: inherit; -webkit-appearance: none; appearance: none; -webk
 @media (max-width: 540px) {
   .petals-grid2 { grid-template-columns: 1fr !important; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  #compare-body { transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -61,11 +65,11 @@ button { font-family: inherit; -webkit-appearance: none; appearance: none; -webk
 
 <script>
 const FACTORS = [
-  {key:'p', name:'Productivity', prompt:'How much did you get done that actually mattered?', low:'Stuck', high:'On top of it', hints:["Couldn't get much off the ground","Slow progress, lots of friction","Got through some things, not as much as I hoped","Made solid progress on what mattered","Felt really on top of everything"]},
-  {key:'e', name:'Enjoyment', prompt:'How much did you enjoy the work itself?', low:'A slog', high:'Loved it', hints:["Really struggled to find anything to enjoy","Hard to find motivation most of the time","Work was fine, nothing really stood out","Genuinely enjoyed most of what I worked on","Loved what I was working on"]},
-  {key:'t', name:'Teamwork', prompt:'How connected did you feel to the people around you?', low:'Alone', high:'In sync', hints:["Felt disconnected or isolated from the team","Collaboration felt difficult or strained","Team interactions were okay, nothing special","Worked well with the team","Team felt completely in sync"]},
-  {key:'l', name:'Learning', prompt:'How much did you learn or grow this week?', low:'In circles', high:'Breakthroughs', hints:["Felt stuck, going in circles","Little new ground covered","Picked something up, nothing major","Learned something genuinely useful","Had some real breakthrough moments"]},
-  {key:'s', name:'Serenity', prompt:'How calm and settled did you feel?', low:'Frazzled', high:'At ease', hints:["Felt overwhelmed and under constant pressure","Under pressure more than felt comfortable","Manageable, but not really relaxed","Mostly calm and focused","Felt settled and in the zone"]}
+  {key:'p', name:'Productivity', emoji:'🚀', prompt:'How much did you get done that actually mattered?', low:'Stuck', high:'On top of it', hints:["Couldn't get much off the ground","Slow progress, lots of friction","Got through some things, not as much as I hoped","Made solid progress on what mattered","Felt really on top of everything"]},
+  {key:'e', name:'Enjoyment', emoji:'😄', prompt:'How much did you enjoy the work itself?', low:'A slog', high:'Loved it', hints:["Really struggled to find anything to enjoy","Hard to find motivation most of the time","Work was fine, nothing really stood out","Genuinely enjoyed most of what I worked on","Loved what I was working on"]},
+  {key:'t', name:'Teamwork', emoji:'🤝', prompt:'How connected did you feel to the people around you?', low:'Alone', high:'In sync', hints:["Felt disconnected or isolated from the team","Collaboration felt difficult or strained","Team interactions were okay, nothing special","Worked well with the team","Team felt completely in sync"]},
+  {key:'l', name:'Learning', emoji:'🌱', prompt:'How much did you learn or grow this week?', low:'In circles', high:'Breakthroughs', hints:["Felt stuck, going in circles","Little new ground covered","Picked something up, nothing major","Learned something genuinely useful","Had some real breakthrough moments"]},
+  {key:'s', name:'Serenity', emoji:'🧘', prompt:'How calm and settled did you feel?', low:'Frazzled', high:'At ease', hints:["Felt overwhelmed and under constant pressure","Under pressure more than felt comfortable","Manageable, but not really relaxed","Mostly calm and focused","Felt settled and in the zone"]}
 ];
 const COLORS = {1:'#F24822',2:'#FFA629',3:'#FFCD29',4:'#BBCC00',5:'#14AE5C'};
 // Core brand colours, pulled from the five petal fills in the PETALS logo mark.
@@ -83,6 +87,7 @@ const EMPTY_PETAL = '#efe7d3';
 
 let state = defaultState();
 let advanceTimer = null, copyTimer = null;
+let flowerUid = 0;
 
 function defaultState(){
   return {screen:'intro', mode:'solo', step:0, scores:{p:0,e:0,t:0,l:0,s:0}, theirScores:null, revealCount:0, tab:'individuals', copied:false, shared:false, advancing:false};
@@ -99,13 +104,16 @@ function buildFlower(opts){
   const scores = opts.scores || {p:0,e:0,t:0,l:0,s:0};
   const revealed = opts.revealed == null ? 6 : opts.revealed;
   const showScores = opts.showScores !== false;
-  const labels = !!opts.labels;
+  const showLabels = opts.labels !== false;
+  const uid = 'fl' + (flowerUid++);
+  const R = 86, R_LABEL = 60, HALF_ANGLE = 55 * Math.PI / 180;
+  const CENTER = 218;
   const defs = [
-    {k:'p', cx:218, cy:90,  lx:218, ly:-8,  a:'middle'},
-    {k:'e', cx:346, cy:202, lx:432, ly:150, a:'end'},
-    {k:'t', cx:298, cy:331, lx:352, ly:442, a:'middle'},
-    {k:'l', cx:154, cy:331, lx:104, ly:442, a:'middle'},
-    {k:'s', cx:90,  cy:202, lx:12,  ly:150, a:'start'}
+    {k:'p', cx:218, cy:90},
+    {k:'e', cx:346, cy:202},
+    {k:'t', cx:298, cy:331},
+    {k:'l', cx:154, cy:331},
+    {k:'s', cx:90,  cy:202}
   ];
   let petalsHtml = '', numsHtml = '', labelsHtml = '';
   defs.forEach((d,i)=>{
@@ -113,12 +121,22 @@ function buildFlower(opts){
     const on = i < revealed && v > 0;
     const rv = Math.round(v);
     const fill = on ? COLORS[rv] : EMPTY_PETAL;
-    petalsHtml += `<circle cx="${d.cx}" cy="${d.cy}" r="86" fill="${fill}" stroke="#141414" stroke-width="5" style="transition:fill .35s ease"></circle>`;
+    petalsHtml += `<circle cx="${d.cx}" cy="${d.cy}" r="${R}" fill="${fill}" stroke="#141414" stroke-width="7.5" style="transition:fill .35s ease"></circle>`;
     if(on && showScores){
       numsHtml += `<text x="${d.cx}" y="${d.cy}" text-anchor="middle" dominant-baseline="central" fill="${textOn(rv)}" style="font-family:'Lilita One',cursive;font-size:42px">${fmt(v)}</text>`;
     }
-    if(labels){
-      labelsHtml += `<text x="${d.lx}" y="${d.ly}" text-anchor="${d.a}" style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;fill:#141414;letter-spacing:.5px">${factorName(d.k)}</text>`;
+    if(on && showLabels){
+      // Point the label toward this petal's outward tip (away from the flower's center),
+      // so it sits on the part of the petal least covered by overlapping neighbors.
+      const theta = Math.atan2(d.cx - CENTER, CENTER - d.cy);
+      const a1 = theta - HALF_ANGLE, a2 = theta + HALF_ANGLE;
+      const arcId = `${uid}-arc-${d.k}`;
+      const x1 = (d.cx + R_LABEL*Math.sin(a1)).toFixed(2);
+      const y1 = (d.cy - R_LABEL*Math.cos(a1)).toFixed(2);
+      const x2 = (d.cx + R_LABEL*Math.sin(a2)).toFixed(2);
+      const y2 = (d.cy - R_LABEL*Math.cos(a2)).toFixed(2);
+      petalsHtml += `<path id="${arcId}" d="M ${x1} ${y1} A ${R_LABEL} ${R_LABEL} 0 0 1 ${x2} ${y2}" fill="none" stroke="none"></path>`;
+      labelsHtml += `<text style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;fill:${textOn(rv)};fill-opacity:.55"><textPath href="#${arcId}" xlink:href="#${arcId}" startOffset="50%" text-anchor="middle">${factorName(d.k).toUpperCase()}</textPath></text>`;
     }
   });
   const avgRaw = mean(scores);
@@ -130,9 +148,9 @@ function buildFlower(opts){
     : '';
   return `<svg viewBox="0 0 456 452" style="width:100%;height:auto;display:block;overflow:visible">
     <g transform="translate(6 8)">
-      ${labelsHtml}
       ${petalsHtml}
-      <circle cx="218" cy="218" r="86" fill="${centerFill}" stroke="#141414" stroke-width="5" style="transition:fill .35s ease"></circle>
+      <circle cx="218" cy="218" r="${R}" fill="${centerFill}" stroke="#141414" stroke-width="5" style="transition:fill .35s ease"></circle>
+      ${labelsHtml}
       ${numsHtml}
       ${centerNum}
     </g>
@@ -282,21 +300,18 @@ function renderCompareLanding(){
   </div>`;
 }
 
-function renderCompareResult(){
+function tabsHtmlFor(tab){
+  return `
+    <button id="tab-individuals" onclick="petalsSwitchTab('individuals')" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border:3px solid #141414;border-radius:10px 0 0 10px;margin-left:0;cursor:pointer;background:${tab==='individuals'?'#141414':'#fff'};color:${tab==='individuals'?'#fff':'#141414'}">Individuals</button>
+    <button id="tab-team" onclick="petalsSwitchTab('team')" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border:3px solid #141414;border-radius:0 10px 10px 0;margin-left:-3px;cursor:pointer;background:${tab==='team'?'#141414':'#fff'};color:${tab==='team'?'#fff':'#141414'}">Team flower</button>`;
+}
+
+function compareBodyHtml(tab){
   const their = state.theirScores || {p:0,e:0,t:0,l:0,s:0};
   const mine = state.scores;
-  const origAvg = mean(their);
-  const recipAvg = mean(mine);
-  const diff = Math.abs(origAvg - recipAvg);
-  const headline = diff<=0.5 ? 'Your weeks were remarkably similar' : (diff<=1.5 ? 'A few differences worth talking about' : 'Some real contrasts this week');
   const done = state.revealCount >= 6;
 
-  const tabsHtml = `
-    <button onclick="petalsSwitchTab('individuals')" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border:3px solid #141414;border-radius:10px 0 0 10px;margin-left:0;cursor:pointer;background:${state.tab==='individuals'?'#141414':'#fff'};color:${state.tab==='individuals'?'#fff':'#141414'}">Individuals</button>
-    <button onclick="petalsSwitchTab('team')" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border:3px solid #141414;border-radius:0 10px 10px 0;margin-left:-3px;cursor:pointer;background:${state.tab==='team'?'#141414':'#fff'};color:${state.tab==='team'?'#fff':'#141414'}">Team flower</button>`;
-
-  let bodyHtml = '';
-  if(state.tab === 'individuals'){
+  if(tab === 'individuals'){
     const theirFlower = buildFlower({scores:their, revealed:state.revealCount, showScores:true});
     const myFlower = buildFlower({scores:mine, revealed:state.revealCount, showScores:true});
     let doneBlock = '';
@@ -306,10 +321,10 @@ function renderCompareResult(){
       const accStyle = "border:2.5px solid #141414;border-left:8px solid #14AE5C;border-radius:10px;background:rgba(20,174,92,.12);padding:12px 15px;font-size:14px;font-weight:500;line-height:1.45;color:#3a352a";
       FACTORS.forEach(f=>{
         const gap = their[f.key] - mine[f.key];
-        if(Math.abs(gap) >= 2) analysis.push({label:f.name+'. ', body: gap>0 ? DIVERGE[f.key].theirs : DIVERGE[f.key].yours, style:divStyle});
+        if(Math.abs(gap) >= 2) analysis.push({label:`${f.emoji} ${f.name}. `, body: gap>0 ? DIVERGE[f.key].theirs : DIVERGE[f.key].yours, style:divStyle});
       });
       FACTORS.forEach(f=>{
-        if(their[f.key] === mine[f.key] && mine[f.key] >= 4) analysis.push({label:f.name+'. ', body:'You both rated it '+mine[f.key]+'/5. That shared high point is worth celebrating.', style:accStyle});
+        if(their[f.key] === mine[f.key] && mine[f.key] >= 4) analysis.push({label:`${f.emoji} ${f.name}. `, body:'You both rated it '+mine[f.key]+'/5. That shared high point is worth celebrating.', style:accStyle});
       });
       if(analysis.length === 0) analysis.push({label:'', body:'Your scores are close across the board, a sign of real alignment.', style:accStyle});
       doneBlock = `
@@ -321,57 +336,62 @@ function renderCompareResult(){
         <button class="pt-press" onclick="petalsSwitchTab('team')" style="width:100%;margin-top:20px;background:#14AE5C;color:#fff;border:3px solid #141414;border-radius:12px;padding:15px;font-family:'Lilita One',cursive;font-size:18px;cursor:pointer;box-shadow:5px 5px 0 #141414">Merge into your team flower &rarr;</button>
       </div>`;
     }
-    bodyHtml = `
+    return `
     <div>
       <div class="petals-grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div style="background:#fff;border:3px solid #141414;border-radius:16px;padding:16px 12px;box-shadow:5px 5px 0 #141414;text-align:center">
-          <div style="font-family:'Lilita One',cursive;font-size:12px;letter-spacing:1px;color:#8a8266;margin-bottom:8px">THEIR WEEK</div>
-          ${theirFlower}
-          <div style="font-family:'Lilita One',cursive;font-size:32px;margin-top:8px">${origAvg.toFixed(1)}</div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a8266">Average</div>
+          <div style="font-family:'Lilita One',cursive;font-size:12px;letter-spacing:1px;color:#14AE5C;margin-bottom:8px">YOUR PETALS</div>
+          ${myFlower}
         </div>
         <div style="background:#fff;border:3px solid #141414;border-radius:16px;padding:16px 12px;box-shadow:5px 5px 0 #141414;text-align:center">
-          <div style="font-family:'Lilita One',cursive;font-size:12px;letter-spacing:1px;color:#14AE5C;margin-bottom:8px">YOUR WEEK</div>
-          ${myFlower}
-          <div style="font-family:'Lilita One',cursive;font-size:32px;margin-top:8px">${recipAvg.toFixed(1)}</div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a8266">Average</div>
+          <div style="font-family:'Lilita One',cursive;font-size:12px;letter-spacing:1px;color:#8a8266;margin-bottom:8px">THEIR PETALS</div>
+          ${theirFlower}
         </div>
       </div>
       ${doneBlock}
     </div>`;
-  } else {
-    const merged = {};
-    FACTORS.forEach(f=> merged[f.key] = (their[f.key] + mine[f.key]) / 2);
-    const teamAvg = mean(merged);
-    const teamFlower = buildFlower({scores:merged, revealed:6, showScores:true});
-    const teamChips = FACTORS.map(f=>{
-      const v = merged[f.key]; const rv = Math.round(v); const col = COLORS[rv]||'#ccc'; const tc = (rv===1||rv===5)?'#fff':'#141414';
-      const disp = Number.isInteger(v) ? v : v.toFixed(1);
-      return `<span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border-radius:20px;border:2.5px solid #141414;background:${col};color:${tc}">${f.name} ${disp}</span>`;
-    }).join('');
-    bodyHtml = `
-    <div class="pt-rise" style="max-width:460px;margin:0 auto">
-      <div style="background:#fff;border:3px solid #141414;border-radius:16px;padding:20px 16px;box-shadow:6px 6px 0 #141414;text-align:center">
-        <div style="font-family:'Lilita One',cursive;font-size:13px;letter-spacing:1px;color:#8a8266;margin-bottom:8px">YOUR TEAM'S WEEK</div>
-        ${teamFlower}
-        <div style="font-family:'Lilita One',cursive;font-size:40px;margin-top:10px">${teamAvg.toFixed(1)}</div>
-        <div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a8266">Team average</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:16px">${teamChips}</div>
-      </div>
-      <div style="margin-top:20px;background:#F24822;border:3px solid #141414;border-radius:16px;padding:20px;box-shadow:6px 6px 0 #141414;color:#fff">
-        <div style="font-family:'Lilita One',cursive;font-size:22px;line-height:1.05;margin-bottom:8px">Do this every week, together</div>
-        <p style="font-size:14.5px;font-weight:500;line-height:1.5;margin:0 0 16px;color:#fff">One honest check-in opens conversations that months of meetings miss. PETALS makes reflection a weekly habit your whole team shares.</p>
-        <a href="https://usepetals.com/account/join" target="_blank" rel="noopener" class="pt-press-y" style="display:inline-block;background:#141414;color:#fff;border:2.5px solid #141414;border-radius:10px;padding:13px 22px;font-family:'Lilita One',cursive;font-size:17px;text-decoration:none;box-shadow:4px 4px 0 #BBCC00">Start with your team</a>
-      </div>
-      <button onclick="petalsRestart()" style="width:100%;margin-top:14px;background:none;border:none;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:#8a8266;cursor:pointer;padding:6px">Score another week</button>
-    </div>`;
   }
+
+  const merged = {};
+  FACTORS.forEach(f=> merged[f.key] = (their[f.key] + mine[f.key]) / 2);
+  const teamAvg = mean(merged);
+  const teamFlower = buildFlower({scores:merged, revealed:6, showScores:true});
+  const teamChips = FACTORS.map(f=>{
+    const v = merged[f.key]; const rv = Math.round(v); const col = COLORS[rv]||'#ccc'; const tc = (rv===1||rv===5)?'#fff':'#141414';
+    const disp = Number.isInteger(v) ? v : v.toFixed(1);
+    return `<span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:5px 11px;border-radius:20px;border:2.5px solid #141414;background:${col};color:${tc}">${f.name} ${disp}</span>`;
+  }).join('');
+  return `
+  <div class="pt-rise" style="max-width:460px;margin:0 auto">
+    <div style="background:#fff;border:3px solid #141414;border-radius:16px;padding:20px 16px;box-shadow:6px 6px 0 #141414;text-align:center">
+      <div style="font-family:'Lilita One',cursive;font-size:13px;letter-spacing:1px;color:#8a8266;margin-bottom:8px">YOUR TEAM'S WEEK</div>
+      ${teamFlower}
+      <div style="font-family:'Lilita One',cursive;font-size:40px;margin-top:10px">${teamAvg.toFixed(1)}</div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#8a8266">Team average</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:16px">${teamChips}</div>
+    </div>
+    <div style="margin-top:20px;background:#F24822;border:3px solid #141414;border-radius:16px;padding:20px;box-shadow:6px 6px 0 #141414;color:#fff">
+      <div style="font-family:'Lilita One',cursive;font-size:22px;line-height:1.05;margin-bottom:8px">Do this every week, together</div>
+      <p style="font-size:14.5px;font-weight:500;line-height:1.5;margin:0 0 16px;color:#fff">One honest check-in opens conversations that months of meetings miss. PETALS makes reflection a weekly habit your whole team shares.</p>
+      <a href="https://usepetals.com/account/join" target="_blank" rel="noopener" class="pt-press-y" style="display:inline-block;background:#141414;color:#fff;border:2.5px solid #141414;border-radius:10px;padding:13px 22px;font-family:'Lilita One',cursive;font-size:17px;text-decoration:none;box-shadow:4px 4px 0 #BBCC00">Start with your team</a>
+    </div>
+    <button onclick="petalsRestart()" style="width:100%;margin-top:14px;background:none;border:none;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:#8a8266;cursor:pointer;padding:6px">Score another week</button>
+  </div>`;
+}
+
+function renderCompareResult(){
+  const their = state.theirScores || {p:0,e:0,t:0,l:0,s:0};
+  const mine = state.scores;
+  const origAvg = mean(their);
+  const recipAvg = mean(mine);
+  const diff = Math.abs(origAvg - recipAvg);
+  const headline = diff<=0.5 ? 'Your weeks were remarkably similar' : (diff<=1.5 ? 'A few differences worth talking about' : 'Some real contrasts this week');
 
   return `
   <div style="max-width:720px;margin:0 auto">
     <h1 style="font-family:'Lilita One',cursive;font-size:32px;line-height:1.02;text-align:center;margin:0 auto 20px;max-width:560px">${headline}</h1>
-    <div style="display:flex;justify-content:center;margin-bottom:22px">${tabsHtml}</div>
-    ${bodyHtml}
+    <div id="compare-tabs" style="display:flex;justify-content:center;margin-bottom:22px">${tabsHtmlFor(state.tab)}</div>
+    <div style="overflow:hidden"><div id="compare-body">${compareBodyHtml(state.tab)}</div></div>
   </div>`;
 }
 
@@ -430,8 +450,36 @@ function petalsStartCompareOwn(){
 }
 
 function petalsSwitchTab(t){
-  state.tab = t;
-  render();
+  if(state.tab === t) return;
+  const body = document.getElementById('compare-body');
+  const tabsWrap = document.getElementById('compare-tabs');
+  if(!body){ state.tab = t; render(); return; }
+
+  const dir = t === 'team' ? 1 : -1;
+  const DUR = 420;
+  const EASE = 'cubic-bezier(.65,0,.35,1)';
+
+  body.style.transition = `transform ${DUR}ms ${EASE}, filter ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
+  body.style.transform = `translateX(${dir*-36}px)`;
+  body.style.filter = 'blur(8px)';
+  body.style.opacity = '0';
+
+  setTimeout(()=>{
+    state.tab = t;
+    body.innerHTML = compareBodyHtml(t);
+    if(tabsWrap) tabsWrap.innerHTML = tabsHtmlFor(t);
+
+    body.style.transition = 'none';
+    body.style.transform = `translateX(${dir*36}px)`;
+    body.style.filter = 'blur(8px)';
+    body.style.opacity = '0';
+    void body.offsetHeight;
+
+    body.style.transition = `transform ${DUR}ms ${EASE}, filter ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}`;
+    body.style.transform = 'translateX(0)';
+    body.style.filter = 'blur(0px)';
+    body.style.opacity = '1';
+  }, DUR);
 }
 
 function petalsShareUrl(){
