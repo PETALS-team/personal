@@ -513,11 +513,12 @@ function petalsCopy(){
 function petalsShareText(){
   const s = state.scores;
   const a = mean(s).toFixed(1);
-  return "My PETALS week: Productivity "+s.p+"/5, Enjoyment "+s.e+"/5, Teamwork "+s.t+"/5, Learning "+s.l+"/5, Serenity "+s.s+"/5. Average "+a+"/5. How did your week compare? "+petalsShareUrl()+" #PETALS";
+  const f = FACTORS.map(fac => fac.emoji+' '+fac.name+' '+s[fac.key]+'/5').join(', ');
+  return "My PETALS week: "+f+". Average "+a+"/5. How did your week compare? "+petalsShareUrl()+" #PETALS";
 }
 
 function petalsShareIn(){
-  window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(petalsShareUrl()),'_blank','width=600,height=600');
+  window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(petalsShareUrl())+'&summary='+encodeURIComponent(petalsShareText()),'_blank','width=600,height=600');
   state.shared = true; render();
 }
 
